@@ -74,12 +74,14 @@ movies &amp;lt;- read_csv(here::here(&amp;quot;content/blogs/movies.csv&amp;quot
     </item>
     
     <item>
-      <title>Ipsum</title>
+      <title>Who am I?</title>
       <link>/blogs/ipsum/</link>
       <pubDate>Tue, 31 Oct 2017 21:28:43 -0500</pubDate>
       
       <guid>/blogs/ipsum/</guid>
-      <description>Nullam et orci eu lorem consequat tincidunt vivamus et sagittis magna sed nunc rhoncus condimentum sem. In efficitur ligula tate urna. Maecenas massa sed magna lacinia magna pellentesque lorem ipsum dolor. Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis tempus.</description>
+      <description>❤️Some Random FACTS about ME
+  Influenced by the book of “The Nature of Data”, wrote by Herbert Chia, I become a believer in business intelligence and consider that all the companies and positions will be intertwined with data analytics in the future.
+  Watching the movie Love Actually on the Christmas Eve has become a kind of ceremony for me. The film inspired me to express love to people around me.</description>
     </item>
     
   </channel>
