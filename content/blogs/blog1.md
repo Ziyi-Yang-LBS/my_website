@@ -42,4 +42,4 @@ title: Who am I?
 
 15. Although I am not tall, I stood out in the women basketball team in SYSU. By virtue of explosive and flexible, I became the leading play as a point guard.
 
-16.Last but not least, I love coding!💕
+16. Last but not least, I love coding!💕
