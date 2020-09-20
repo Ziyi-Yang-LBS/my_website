@@ -1,0 +1,103 @@
+---
+categories:
+- ""
+- ""
+date: "2020-09-18"
+description: How many cases observed in different provinces? A visualisation with map
+draft: false
+image: pic11.jpg
+keywords: ""
+slug: blog5
+title: History Covid-19 cases across China
+---
+# Introduction
+
+## Purpose of research
+
+We always wonder what is the best way for us to show the pandemic against geography information. Simple plots between the name of location and the number of cases is lack of visualisation. So we are now trying to see how to combine number of cases with a map.
+
+## Data Source
+
+It is amazing to see a package called "nCov2019" in Github which contains live data of confirmed cases in China. The data is updated daily and could be combined with province data which then can be transformed into a map. So there is no need to import any other external data to make the plot.
+
+## packages
+
+The most important package we use here is "nCov2019" which contains live data of confirmed cases, death and so on information of Covid-19 in China.
+
+We also use "RColorBrewer" here to set the color in the map to show the difference between provinces in confirmed cases. It has many colours and we can choose the one we wish by putting the serie number in the code.
+
+Finally, we also use "magick" to edit the plot. It is one of the best packages in R to deal with graph and we use it here to edit the map we capture.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(lubridate)
+library(magrittr)
+library(tibble)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(purrr)
+library(gganimate)
+library(gifski)
+library(nCov2019)
+library(magick)
+library(tidyverse)
+library(RColorBrewer)
+```
+
+
+# Generating data
+```{r}
+x <- get_nCov2019(lang='zh')     # get latest covid-19 data
+province_data <- x[]       # generate province data
+head(province_data)
+```
+
+
+# Map
+```{r}
+load("ProvinceMapDatas.Rda") 
+```
+
+
+# Combine map info with covid-19 info
+```{r, message=FALSE, warning=FALSE}
+df_China <- df_China %>%
+  left_join(province_data, by=c("NAME"="name")) 
+
+names(df_China)[16] <- "Confirm_cases"
+```
+
+
+# Plotting
+```{r}
+ggplot() +
+  geom_polygon(data=df_China, 
+               aes(x=long, y=lat, group=interaction(class, group), 
+                   fill=`confirm`), colour="black", size=0.25) +  # plot Chinese map
+  geom_rect(aes(xmin=124, xmax=124+9.3, ymin=16-0.3, ymax=16+9), 
+            fill=NA, colour="black", size=0.25) +
+  geom_line(data=df_NanHaiLine, aes(x=long, y=lat, group=ID), 
+            colour="black", size=1) +  # make sure we draw the right border
+  scale_fill_gradientn(colours=colorRampPalette(rev(brewer.pal(11,'Spectral')))(32),
+                       name = "History \nCases",
+                       limits = c(500,2000)) +
+  coord_map() +  
+  ylim(14, 54) +
+  labs(x="Longitude", y="Latitude") +
+  ggtitle("History Covid-19 Cases in China") +
+  theme(
+    plot.title=element_text(hjust=0.5),
+    legend.position = c(0.1,0.2),
+    legend.background = element_blank())+
+  theme_bw()
+```
+
+
+# Conclusion
+We here can see the confirmed cases plot in a Chinese map. We can see that east China has the most confirmed cases in China between 1,000 and 1,500 from February. West China is in good shape and did not witness cases more than 1,000. Hubei, whose capital is Wuhan, has the most cases overall.

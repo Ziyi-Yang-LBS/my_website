@@ -1,0 +1,257 @@
+<!DOCTYPE HTML>
+<html>
+
+    <head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<meta name="description" content="Hi! I am a current Masters in Analytics and Management student at London Business school. I am from Shenzhen, China and I am passionate on data analytics.">
+	<meta name="author" content="Ziyi Yang">
+	<meta name="generator" content="Hugo 0.75.1" />
+	<title>History Covid-19 cases across China &middot; Portfolio website for Ziyi Yang</title>
+	<!-- Stylesheets -->
+	
+	<link rel="stylesheet" href="/css/main.css"/>
+	
+	
+
+	
+
+	<!-- Custom Fonts -->
+	<link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+	
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
+	
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="js/ie/html5shiv.js"></script>
+	<script src="js/ie/html5shiv.jsrespond.min.js"></script>
+	<![endif]-->
+</head>
+
+    <body>
+
+    <!-- Wrapper -->
+        <div id="wrapper">
+
+            <!-- Header -->
+    <header id="header" class="alt">
+        <a href="/" class="logo"><strong>Ziyi Yang</strong> <span>MAM 2021</span></a>
+        <nav>
+            <a href="#menu">Menu</a>
+        </nav>
+    </header>
+
+<!-- Menu -->
+    <nav id="menu">
+        <ul class="links">
+            
+                <li><a href="/">Home</a></li>
+            
+                <li><a href="/blogs">Blogs</a></li>
+            
+                <li><a href="/blogs/ipsum">Generic Blog</a></li>
+            
+
+        </ul>
+        <ul class="actions vertical">
+            
+                <li><a href="/blogs" class="button special fit">Get Started</a></li>
+            
+            
+                <li><a href="/" class="button fit">Log In</a></li>
+            
+        </ul>
+    </nav>
+
+        <!-- Main -->
+            <div id="main" class="alt">
+
+                
+                    <section id="one">
+                        <div class="inner">
+                            <header class="major">
+                                <h1>History Covid-19 cases across China</h1>
+                            </header>
+                            
+                                <span class="image main"><img src="/img/blogs/pic11.jpg" alt="" /></span>
+                            
+                            
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<div id="purpose-of-research" class="section level2">
+<h2>Purpose of research</h2>
+<p>We always wonder what is the best way for us to show the pandemic against geography information. Simple plots between the name of location and the number of cases is lack of visualisation. So we are now trying to see how to combine number of cases with a map.</p>
+</div>
+<div id="data-source" class="section level2">
+<h2>Data Source</h2>
+<p>It is amazing to see a package called “nCov2019” in Github which contains live data of confirmed cases in China. The data is updated daily and could be combined with province data which then can be transformed into a map. So there is no need to import any other external data to make the plot.</p>
+</div>
+<div id="packages" class="section level2">
+<h2>packages</h2>
+<p>The most important package we use here is “nCov2019” which contains live data of confirmed cases, death and so on information of Covid-19 in China.</p>
+<p>We also use “RColorBrewer” here to set the color in the map to show the difference between provinces in confirmed cases. It has many colours and we can choose the one we wish by putting the serie number in the code.</p>
+<p>Finally, we also use “magick” to edit the plot. It is one of the best packages in R to deal with graph and we use it here to edit the map we capture.</p>
+<pre class="r"><code>library(readr)
+library(lubridate)</code></pre>
+<pre><code>## 
+## 载入程辑包：&#39;lubridate&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     date, intersect, setdiff, union</code></pre>
+<pre class="r"><code>library(magrittr)
+library(tibble)
+library(dplyr)</code></pre>
+<pre><code>## 
+## 载入程辑包：&#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(ggplot2)
+library(tidyr)</code></pre>
+<pre><code>## 
+## 载入程辑包：&#39;tidyr&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:magrittr&#39;:
+## 
+##     extract</code></pre>
+<pre class="r"><code>library(purrr)</code></pre>
+<pre><code>## 
+## 载入程辑包：&#39;purrr&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:magrittr&#39;:
+## 
+##     set_names</code></pre>
+<pre class="r"><code>library(gganimate)
+library(gifski)
+library(nCov2019)
+library(magick)</code></pre>
+<pre><code>## Linking to ImageMagick 6.9.9.39
+## Enabled features: cairo, fontconfig, freetype, lcms, pango, rsvg, webp
+## Disabled features: fftw, ghostscript, x11</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ─ Attaching packages ───────────────────────────────────────────────── tidyverse 1.3.0 ─</code></pre>
+<pre><code>## ✓ stringr 1.4.0     ✓ forcats 0.5.0</code></pre>
+<pre><code>## ─ Conflicts ────────────────────────────────────────────────── tidyverse_conflicts() ─
+## x lubridate::as.difftime() masks base::as.difftime()
+## x lubridate::date()        masks base::date()
+## x tidyr::extract()         masks magrittr::extract()
+## x dplyr::filter()          masks stats::filter()
+## x lubridate::intersect()   masks base::intersect()
+## x dplyr::lag()             masks stats::lag()
+## x purrr::set_names()       masks magrittr::set_names()
+## x lubridate::setdiff()     masks base::setdiff()
+## x lubridate::union()       masks base::union()</code></pre>
+<pre class="r"><code>library(RColorBrewer)</code></pre>
+</div>
+</div>
+<div id="generating-data" class="section level1">
+<h1>Generating data</h1>
+<pre class="r"><code>x &lt;- get_nCov2019(lang=&#39;zh&#39;)     # get latest covid-19 data
+province_data &lt;- x[]       # generate province data
+head(province_data)</code></pre>
+<pre><code>##   name nowConfirm confirm suspect dead deadRate showRate heal healRate showHeal
+## 1 香港        198    5009       0  103     2.06    FALSE 4708    93.99     TRUE
+## 2 上海         49     972       0    7     0.72    FALSE  916    94.24     TRUE
+## 3 陕西         24     399       0    3     0.75    FALSE  372    93.23     TRUE
+## 4 台湾         20     506       0    7     1.38    FALSE  479    94.66     TRUE
+## 5 广东         18    1793       0    8     0.45    FALSE 1767    98.55     TRUE
+## 6 四川         17     672       0    3     0.45    FALSE  652    97.02     TRUE</code></pre>
+</div>
+<div id="map" class="section level1">
+<h1>Map</h1>
+<pre class="r"><code>load(&quot;ProvinceMapDatas.Rda&quot;) </code></pre>
+</div>
+<div id="combine-map-info-with-covid-19-info" class="section level1">
+<h1>Combine map info with covid-19 info</h1>
+<pre class="r"><code>df_China &lt;- df_China %&gt;%
+  left_join(province_data, by=c(&quot;NAME&quot;=&quot;name&quot;)) 
+
+names(df_China)[16] &lt;- &quot;Confirm_cases&quot;</code></pre>
+</div>
+<div id="plotting" class="section level1">
+<h1>Plotting</h1>
+<pre class="r"><code>ggplot() +
+  geom_polygon(data=df_China, 
+               aes(x=long, y=lat, group=interaction(class, group), 
+                   fill=`confirm`), colour=&quot;black&quot;, size=0.25) +  # plot Chinese map
+  geom_rect(aes(xmin=124, xmax=124+9.3, ymin=16-0.3, ymax=16+9), 
+            fill=NA, colour=&quot;black&quot;, size=0.25) +
+  geom_line(data=df_NanHaiLine, aes(x=long, y=lat, group=ID), 
+            colour=&quot;black&quot;, size=1) +  # make sure we draw the right border
+  scale_fill_gradientn(colours=colorRampPalette(rev(brewer.pal(11,&#39;Spectral&#39;)))(32),
+                       name = &quot;History \nCases&quot;,
+                       limits = c(500,2000)) +
+  coord_map() +  
+  ylim(14, 54) +
+  labs(x=&quot;Longitude&quot;, y=&quot;Latitude&quot;) +
+  ggtitle(&quot;History Covid-19 Cases in China&quot;) +
+  theme(
+    plot.title=element_text(hjust=0.5),
+    legend.position = c(0.1,0.2),
+    legend.background = element_blank())+
+  theme_bw()</code></pre>
+<p><img src="/blogs/blog5_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>We here can see the confirmed cases plot in a Chinese map. We can see that east China has the most confirmed cases in China between 1,000 and 1,500 from February. West China is in good shape and did not witness cases more than 1,000. Hubei, whose capital is Wuhan, has the most cases overall.</p>
+</div>
+
+                        </div>
+                    </section>
+            <!-- Disqus Inject -->
+                
+            </div>
+            
+        <!-- Footer -->
+            
+                <!-- Footer -->
+    <footer id="footer">
+        <div class="inner">
+            <ul class="icons">
+                
+                    <li><a href="https://www.instagram.com/biubbiu/" class="icon alt fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+                
+                    <li><a href="https://github.com/Ziyi-Yang-LBS" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+                
+                    <li><a href="https://www.linkedin.com/in/ziyi-y-26b304193/" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+                
+            </ul>
+            <ul class="copyright">
+                <li>&copy; Company Name</li>
+                
+            </ul>
+        </div>
+    </footer>
+
+            
+        </div>
+
+    <!-- Scripts -->
+        <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.scrolly.min.js"></script>
+    <script src="/js/jquery.scrollex.min.js"></script>
+    <script src="/js/skel.min.js"></script>
+    <script src="/js/util.js"></script>
+
+    
+
+    <!-- Main JS -->
+    <script src="/js/main.js"></script>
+
+    
+
+    
+
+    </body>
+</html>

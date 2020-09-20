@@ -1,0 +1,436 @@
+<!DOCTYPE HTML>
+<html>
+
+    <head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<meta name="description" content="Hi! I am a current Masters in Analytics and Management student at London Business school. I am from Shenzhen, China and I am passionate on data analytics.">
+	<meta name="author" content="Ziyi Yang">
+	<meta name="generator" content="Hugo 0.75.1" />
+	<title>Development gap - What shape it? &middot; Portfolio website for Ziyi Yang</title>
+	<!-- Stylesheets -->
+	
+	<link rel="stylesheet" href="/css/main.css"/>
+	
+	
+
+	
+
+	<!-- Custom Fonts -->
+	<link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+	
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
+	
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="js/ie/html5shiv.js"></script>
+	<script src="js/ie/html5shiv.jsrespond.min.js"></script>
+	<![endif]-->
+</head>
+
+    <body>
+
+    <!-- Wrapper -->
+        <div id="wrapper">
+
+            <!-- Header -->
+    <header id="header" class="alt">
+        <a href="/" class="logo"><strong>Ziyi Yang</strong> <span>MAM 2021</span></a>
+        <nav>
+            <a href="#menu">Menu</a>
+        </nav>
+    </header>
+
+<!-- Menu -->
+    <nav id="menu">
+        <ul class="links">
+            
+                <li><a href="/">Home</a></li>
+            
+                <li><a href="/blogs">Blogs</a></li>
+            
+                <li><a href="/blogs/ipsum">Generic Blog</a></li>
+            
+
+        </ul>
+        <ul class="actions vertical">
+            
+                <li><a href="/blogs" class="button special fit">Get Started</a></li>
+            
+            
+                <li><a href="/" class="button fit">Log In</a></li>
+            
+        </ul>
+    </nav>
+
+        <!-- Main -->
+            <div id="main" class="alt">
+
+                
+                    <section id="one">
+                        <div class="inner">
+                            <header class="major">
+                                <h1>Development gap - What shape it?</h1>
+                            </header>
+                            
+                                <span class="image main"><img src="/img/blogs/pic14.jpg" alt="" /></span>
+                            
+                            
+
+
+<div id="country-development-education-fertility-hiv-prevalence-life-expectancy-mortality-and-gdp-per-capita" class="section level1">
+<h1>Country development: Education, Fertility, HIV Prevalence, Life expectancy, Mortality and GDP Per Capita</h1>
+<p>Variables we will explore are:
+- Life expectancy at birth (life_expectancy_years.csv)
+- GDP per capita in constant 2010 US$ (<a href="https://data.worldbank.org/indicator/NY.GDP.PCAP.KD" class="uri">https://data.worldbank.org/indicator/NY.GDP.PCAP.KD</a>)
+- Female fertility: The number of babies per woman (<a href="https://data.worldbank.org/indicator/SP.DYN.TFRT.IN" class="uri">https://data.worldbank.org/indicator/SP.DYN.TFRT.IN</a>)
+- Primary school enrollment as % of children attending primary school (<a href="https://data.worldbank.org/indicator/SE.PRM.NENR" class="uri">https://data.worldbank.org/indicator/SE.PRM.NENR</a>)
+- Mortality rate, for under 5, per 1000 live births (<a href="https://data.worldbank.org/indicator/SH.DYN.MORT" class="uri">https://data.worldbank.org/indicator/SH.DYN.MORT</a>)
+- HIV prevalence (adults_with_hiv_percent_age_15_49.csv): The estimated number of people living with HIV per 100 population of age group 15-49.</p>
+<pre class="r"><code># load gapminder HIV data
+hiv &lt;- read_csv(here::here(&quot;content/blogs/adults_with_hiv_percent_age_15_49.csv&quot;))
+life_expectancy &lt;- read_csv(here::here(&quot;content/blogs/life_expectancy_years.csv&quot;))
+
+# get World bank data using wbstats
+indicators &lt;- c(&quot;SP.DYN.TFRT.IN&quot;,&quot;SE.PRM.NENR&quot;, &quot;SH.DYN.MORT&quot;, &quot;NY.GDP.PCAP.KD&quot;)
+
+
+library(wbstats)
+
+worldbank_data &lt;- wb_data(country=&quot;countries_only&quot;, #countries only- no aggregates like Latin America, Europe, etc.
+                          indicator = indicators, 
+                          start_date = 1960, 
+                          end_date = 2016)
+
+# get a dataframe of information regarding countries, indicators, sources, regions, indicator topics, lending types, income levels,  from the World Bank API 
+countries &lt;-  wbstats::wb_cachelist$countries</code></pre>
+<div id="join-the-3-dataframes-life_expectancy-worldbank_data-and-hiv-into-one" class="section level2">
+<h2>Join the 3 dataframes (life_expectancy, worldbank_data, and HIV) into one</h2>
+<pre class="r"><code>hiv_tidy &lt;- hiv %&gt;% 
+  pivot_longer(cols=c(&#39;1979&#39;:&#39;2011&#39;),names_to = &quot;date&quot;,values_to = &quot;hiv_percentage&quot;)
+hiv_tidy$date &lt;- as.numeric(hiv_tidy$date)
+
+life_expectancy_tidy &lt;- life_expectancy %&gt;% 
+  pivot_longer(cols=c(&#39;1800&#39;:&#39;2100&#39;),names_to = &quot;date&quot;,values_to = &quot;life_exp&quot;)
+life_expectancy_tidy$date &lt;- as.numeric(life_expectancy_tidy$date)  
+
+  
+region_worldbank_data &lt;- left_join(countries, worldbank_data, by = &quot;country&quot;) %&gt;%
+  filter(region != &quot;Aggregates&quot;)
+
+countries_data &lt;- full_join(region_worldbank_data, life_expectancy_tidy, by = c(&quot;country&quot;, &quot;date&quot;))
+
+countries_data &lt;- full_join(countries_data, hiv_tidy, by = c(&quot;country&quot;, &quot;date&quot;)) %&gt;%
+  filter(!is.na(region))</code></pre>
+</div>
+<div id="relationship-between-hiv-prevalence-and-life-expectancy" class="section level2">
+<h2>Relationship between HIV prevalence and life expectancy</h2>
+<pre class="r"><code>countries_hiv_lifeexp &lt;- countries_data %&gt;%
+  filter(date &gt;= 1960, #very few datapoint before 1990
+         date &lt;= 2011) %&gt;% #No datapoint for hiv prevalence after 2011
+  group_by(country, region) %&gt;%
+  summarise(mean_hiv = mean(hiv_percentage, na.rm = TRUE),
+            mean_life_exp = mean(life_exp, na.rm = TRUE)) %&gt;%
+  na.omit()
+
+  ggplot(countries_hiv_lifeexp, aes(x = mean_hiv, y = mean_life_exp))+
+  geom_point()+
+  geom_smooth()+
+  facet_wrap(~region,scales=&quot;free&quot;)+ #faceting by countries will make too many plots and it can&#39;t show the whole trend
+  theme_bw()+
+  labs(x = &quot;HIV Prevalence&quot;, 
+       y = &quot;Life Expectancy&quot;, 
+       title = &quot;Relationship between HIV Prevalence and Life Expectancy&quot;,
+       subtitle = &quot;Between 1960 and 2011&quot;)</code></pre>
+<p><img src="/blogs/blog8_files/figure-html/unnamed-chunk-2-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>We noticed that the influence of HIV Prevalence on Life Expectancy varies between regions. In some regions, such as Europe &amp; Central Asia and Latin America &amp; Caribbean, the lower the HIV Prevalence, the higher the Life Expectancy, indicating that HIV Prevalence is a key factor of Life Expectancy. While in some other regions, such as South Asia and East Asia &amp; Pacific, we can’t see a clear trend. The reason might be that those regions don’t have enough data to show the trend.</p>
+</div>
+<div id="relationship-between-fertility-rate-and-gdp-per-capita" class="section level2">
+<h2>Relationship between fertility rate and GDP per capita</h2>
+<pre class="r"><code>ggplot(countries_data, aes(x = NY.GDP.PCAP.KD, y = SP.DYN.TFRT.IN))+
+  geom_point()+
+  geom_smooth()+
+  facet_wrap(~region,scale=&quot;free&quot;)+
+  theme_bw()+
+  labs(x = &quot;GDP per Capita&quot;, 
+       y = &quot;Fertility Rate&quot;, 
+       title = &quot;Relationship between Fertility Rate and GDP per Capita&quot;)</code></pre>
+<p><img src="/blogs/blog8_files/figure-html/unnamed-chunk-3-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>In most regions excluding Middle East &amp; North Africa and Sub-Saharan, we can see a clear negative relationship between GDP per capita and Fertility Rate.When GDP per capita goes higher, the fertility rate goes down. In the those regions being excluded, there is a u-shape trend. When GDP per capita grows, the fertility rate first goes down then goes up .There might be specific tradition which supports them to give birth to more children when they have ability to raise up them.</p>
+</div>
+<div id="mortality-rate-for-under-5-in-different-regions-and-improvement" class="section level2">
+<h2>Mortality rate for under 5 in different regions and improvement</h2>
+<pre class="r"><code>countries_region_mortality &lt;- countries_data %&gt;%
+  group_by(region,date) %&gt;% 
+  summarise(mean_mortality = mean(SH.DYN.MORT, na.rm = TRUE)) #drop NA to find mean, otherwise returns NA
+
+ggplot(countries_region_mortality, aes(x=date,y = mean_mortality ))+
+  geom_line()+
+  facet_wrap(~region)+ 
+  theme_bw()+
+  labs(x=&quot;Date&quot;,y = &quot; Mortality Per 1000 for Under 5&quot;,
+       title = &quot; Mortality Rate for Under 5 changed by region&quot;)</code></pre>
+<p><img src="/blogs/blog8_files/figure-html/unnamed-chunk-4-1.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>countries_mortality_improvement &lt;- select(countries_data, &quot;country&quot;, &quot;date&quot;, &quot;region&quot;, &quot;SH.DYN.MORT&quot;) %&gt;%
+  na.omit()%&gt;% 
+  group_by(country, region) %&gt;%
+  mutate(first_rate = first(SH.DYN.MORT), 
+         last_rate = last(SH.DYN.MORT)) %&gt;%
+  summarise(improvement_rate = mean((first_rate - last_rate)/first_rate))
+  
+
+south_asia &lt;- countries_mortality_improvement %&gt;%
+  filter(region == &quot;South Asia&quot;) %&gt;%
+  arrange(desc(improvement_rate))
+south_asia_top5 &lt;-  south_asia %&gt;% 
+  head(5)
+south_asia_tail5 &lt;-  south_asia %&gt;% 
+  tail(5)
+south_asia_top5</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country    region     improvement_rate
+##   &lt;chr&gt;      &lt;chr&gt;                 &lt;dbl&gt;
+## 1 Maldives   South Asia            0.969
+## 2 Sri Lanka  South Asia            0.913
+## 3 Nepal      South Asia            0.893
+## 4 Bhutan     South Asia            0.887
+## 5 Bangladesh South Asia            0.863</code></pre>
+<pre class="r"><code>south_asia_tail5</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country     region     improvement_rate
+##   &lt;chr&gt;       &lt;chr&gt;                 &lt;dbl&gt;
+## 1 Bhutan      South Asia            0.887
+## 2 Bangladesh  South Asia            0.863
+## 3 India       South Asia            0.831
+## 4 Afghanistan South Asia            0.804
+## 5 Pakistan    South Asia            0.708</code></pre>
+<pre class="r"><code>east_asia_pacific &lt;- countries_mortality_improvement %&gt;%
+  filter(region == &quot;East Asia &amp; Pacific&quot;) %&gt;%
+  arrange(desc(improvement_rate))
+east_asia_pacific_top5 &lt;-  east_asia_pacific %&gt;% 
+  head(5)
+east_asia_pacific_tail5 &lt;-  east_asia_pacific %&gt;% 
+  tail(5)
+east_asia_pacific_top5</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country     region              improvement_rate
+##   &lt;chr&gt;       &lt;chr&gt;                          &lt;dbl&gt;
+## 1 Korea, Rep. East Asia &amp; Pacific            0.970
+## 2 Singapore   East Asia &amp; Pacific            0.943
+## 3 Japan       East Asia &amp; Pacific            0.932
+## 4 Thailand    East Asia &amp; Pacific            0.930
+## 5 China       East Asia &amp; Pacific            0.916</code></pre>
+<pre class="r"><code>east_asia_pacific_tail5</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country                   region              improvement_rate
+##   &lt;chr&gt;                     &lt;chr&gt;                          &lt;dbl&gt;
+## 1 Tuvalu                    East Asia &amp; Pacific            0.672
+## 2 Nauru                     East Asia &amp; Pacific            0.543
+## 3 Palau                     East Asia &amp; Pacific            0.475
+## 4 Korea, Dem. People’s Rep. East Asia &amp; Pacific            0.430
+## 5 Micronesia, Fed. Sts.     East Asia &amp; Pacific            0.425</code></pre>
+<pre class="r"><code>europe_central_asia &lt;- countries_mortality_improvement %&gt;%
+  filter(region == &quot;Europe &amp; Central Asia&quot;) %&gt;%
+  arrange(desc(improvement_rate))
+europe_central_asia_top5 &lt;-  europe_central_asia %&gt;% 
+  head(5)
+europe_central_asia_tail5 &lt;-  europe_central_asia %&gt;% 
+  tail(5)
+europe_central_asia_top5</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country  region                improvement_rate
+##   &lt;chr&gt;    &lt;chr&gt;                            &lt;dbl&gt;
+## 1 Portugal Europe &amp; Central Asia            0.969
+## 2 Turkey   Europe &amp; Central Asia            0.953
+## 3 Italy    Europe &amp; Central Asia            0.934
+## 4 Cyprus   Europe &amp; Central Asia            0.932
+## 5 Poland   Europe &amp; Central Asia            0.928</code></pre>
+<pre class="r"><code>europe_central_asia_tail5</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country         region                improvement_rate
+##   &lt;chr&gt;           &lt;chr&gt;                            &lt;dbl&gt;
+## 1 Moldova         Europe &amp; Central Asia            0.761
+## 2 Ukraine         Europe &amp; Central Asia            0.728
+## 3 Slovak Republic Europe &amp; Central Asia            0.718
+## 4 Turkmenistan    Europe &amp; Central Asia            0.682
+## 5 Monaco          Europe &amp; Central Asia            0.649</code></pre>
+<pre class="r"><code>latin_america_caribbean &lt;- countries_mortality_improvement %&gt;%
+  filter(region == &quot;Latin America &amp; Caribbean&quot;) %&gt;%
+  arrange(desc(improvement_rate))
+latin_america_caribbean_top5 &lt;-  latin_america_caribbean %&gt;% 
+  head(5)
+latin_america_caribbean_tail5 &lt;-  latin_america_caribbean %&gt;% 
+  tail(5)
+latin_america_caribbean_top5</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country             region                    improvement_rate
+##   &lt;chr&gt;               &lt;chr&gt;                                &lt;dbl&gt;
+## 1 Chile               Latin America &amp; Caribbean            0.951
+## 2 Peru                Latin America &amp; Caribbean            0.934
+## 3 El Salvador         Latin America &amp; Caribbean            0.920
+## 4 Ecuador             Latin America &amp; Caribbean            0.916
+## 5 Antigua and Barbuda Latin America &amp; Caribbean            0.914</code></pre>
+<pre class="r"><code>latin_america_caribbean_tail5</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country             region                    improvement_rate
+##   &lt;chr&gt;               &lt;chr&gt;                                &lt;dbl&gt;
+## 1 Trinidad and Tobago Latin America &amp; Caribbean            0.717
+## 2 Venezuela, RB       Latin America &amp; Caribbean            0.694
+## 3 Suriname            Latin America &amp; Caribbean            0.656
+## 4 Guyana              Latin America &amp; Caribbean            0.651
+## 5 Bahamas, The        Latin America &amp; Caribbean            0.539</code></pre>
+<pre class="r"><code>middle_east_north_africa &lt;- countries_mortality_improvement %&gt;%
+  filter(region == &quot;Middle East &amp; North Africa&quot;) %&gt;%
+  arrange(desc(improvement_rate))
+middle_east_north_africa_top5 &lt;- middle_east_north_africa %&gt;% 
+  head(5)
+middle_east_north_africa_tail5 &lt;- middle_east_north_africa %&gt;% 
+  tail(5)
+middle_east_north_africa_top5</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country              region                     improvement_rate
+##   &lt;chr&gt;                &lt;chr&gt;                                 &lt;dbl&gt;
+## 1 Oman                 Middle East &amp; North Africa            0.967
+## 2 Bahrain              Middle East &amp; North Africa            0.963
+## 3 United Arab Emirates Middle East &amp; North Africa            0.961
+## 4 Libya                Middle East &amp; North Africa            0.954
+## 5 Saudi Arabia         Middle East &amp; North Africa            0.951</code></pre>
+<pre class="r"><code>middle_east_north_africa_tail5 </code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country            region                     improvement_rate
+##   &lt;chr&gt;              &lt;chr&gt;                                 &lt;dbl&gt;
+## 1 Yemen, Rep.        Middle East &amp; North Africa            0.861
+## 2 Iraq               Middle East &amp; North Africa            0.851
+## 3 Malta              Middle East &amp; North Africa            0.824
+## 4 West Bank and Gaza Middle East &amp; North Africa            0.804
+## 5 Djibouti           Middle East &amp; North Africa            0.635</code></pre>
+<pre class="r"><code>north_america &lt;- countries_mortality_improvement %&gt;%
+  filter(region == &quot;North America&quot;) %&gt;%
+  arrange(desc(improvement_rate))
+north_america_top5 &lt;-  north_america %&gt;% 
+  head(5)
+north_america_tail5 &lt;-  north_america %&gt;% 
+  tail(5)
+north_america_top5</code></pre>
+<pre><code>## # A tibble: 2 x 3
+## # Groups:   country [2]
+##   country       region        improvement_rate
+##   &lt;chr&gt;         &lt;chr&gt;                    &lt;dbl&gt;
+## 1 Canada        North America            0.840
+## 2 United States North America            0.777</code></pre>
+<pre class="r"><code>north_america_tail5 </code></pre>
+<pre><code>## # A tibble: 2 x 3
+## # Groups:   country [2]
+##   country       region        improvement_rate
+##   &lt;chr&gt;         &lt;chr&gt;                    &lt;dbl&gt;
+## 1 Canada        North America            0.840
+## 2 United States North America            0.777</code></pre>
+<pre class="r"><code>subsaharan_africa &lt;- countries_mortality_improvement %&gt;%
+  filter(region == &quot;Sub-Saharan Africa&quot;) %&gt;%
+  arrange(desc(improvement_rate))
+subsaharan_africa_top5 &lt;-  subsaharan_africa %&gt;% 
+  head(5)
+subsaharan_africa_tail5 &lt;-  subsaharan_africa %&gt;% 
+  tail(5)
+subsaharan_africa_top5</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country     region             improvement_rate
+##   &lt;chr&gt;       &lt;chr&gt;                         &lt;dbl&gt;
+## 1 Cabo Verde  Sub-Saharan Africa            0.900
+## 2 Mauritius   Sub-Saharan Africa            0.861
+## 3 Seychelles  Sub-Saharan Africa            0.858
+## 4 Malawi      Sub-Saharan Africa            0.858
+## 5 Gambia, The Sub-Saharan Africa            0.840</code></pre>
+<pre class="r"><code>subsaharan_africa_tail5</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   country [5]
+##   country           region             improvement_rate
+##   &lt;chr&gt;             &lt;chr&gt;                         &lt;dbl&gt;
+## 1 Equatorial Guinea Sub-Saharan Africa            0.541
+## 2 Lesotho           Sub-Saharan Africa            0.515
+## 3 Namibia           Sub-Saharan Africa            0.511
+## 4 Chad              Sub-Saharan Africa            0.501
+## 5 Somalia           Sub-Saharan Africa            0.346</code></pre>
+<p>The mortality rate for under 5 drops between 1960 and 2016. Some regions witnessed larger decrease since they had a large mortality rate in 1960s. The trend of decrease may come from the development of technology and medical treatment.</p>
+</div>
+<div id="relationship-between-primary-school-enrollment-and-fertility-rate" class="section level2">
+<h2>Relationship between primary school enrollment and fertility rate</h2>
+<pre class="r"><code>ggplot(countries_data, aes(x = SP.DYN.TFRT.IN, y = SE.PRM.NENR))+
+  geom_point()+
+  geom_smooth()+
+  facet_wrap(~region)+
+  theme_bw()+
+  labs(x = &quot;Fertility Rate&quot;, 
+       y = &quot;Primary School Enrollment&quot;, 
+       title = &quot;Relationship between Fertility Rate and Primary School Enrollment&quot;)</code></pre>
+<p><img src="/blogs/blog8_files/figure-html/unnamed-chunk-5-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>We see a negative relationship between Fertility Rate and Primary School Enrollment. It might because that when people give birth to more babies, due to the limit of education resources, the enrollment to primary school decreases.</p>
+</div>
+</div>
+
+                        </div>
+                    </section>
+            <!-- Disqus Inject -->
+                
+            </div>
+            
+        <!-- Footer -->
+            
+                <!-- Footer -->
+    <footer id="footer">
+        <div class="inner">
+            <ul class="icons">
+                
+                    <li><a href="https://www.instagram.com/biubbiu/" class="icon alt fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+                
+                    <li><a href="https://github.com/Ziyi-Yang-LBS" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+                
+                    <li><a href="https://www.linkedin.com/in/ziyi-y-26b304193/" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+                
+            </ul>
+            <ul class="copyright">
+                <li>&copy; Company Name</li>
+                
+            </ul>
+        </div>
+    </footer>
+
+            
+        </div>
+
+    <!-- Scripts -->
+        <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.scrolly.min.js"></script>
+    <script src="/js/jquery.scrollex.min.js"></script>
+    <script src="/js/skel.min.js"></script>
+    <script src="/js/util.js"></script>
+
+    
+
+    <!-- Main JS -->
+    <script src="/js/main.js"></script>
+
+    
+
+    
+
+    </body>
+</html>

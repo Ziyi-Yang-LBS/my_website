@@ -1,0 +1,258 @@
+---
+categories:
+- ""
+- ""
+date: "2020-09-19"
+description: What are the relationships among HIV, GDP, Fertility, Mortality, Life Expectancy and Education ?
+draft: false
+image: pic14.jpg
+keywords: ""
+slug: blog8
+title: Development gap - What shape it?
+---
+
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+
+```{r load-libraries, include=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(httr)
+library(readxl)
+library(vroom)
+```
+
+
+# Country development: Education, Fertility, HIV Prevalence, Life expectancy, Mortality and GDP Per Capita
+
+Variables we will explore are:
+- Life expectancy at birth (life_expectancy_years.csv)
+- GDP per capita in constant 2010 US$ (https://data.worldbank.org/indicator/NY.GDP.PCAP.KD)
+- Female fertility: The number of babies per woman (https://data.worldbank.org/indicator/SP.DYN.TFRT.IN)
+- Primary school enrollment as % of children attending primary school (https://data.worldbank.org/indicator/SE.PRM.NENR)
+- Mortality rate, for under 5, per 1000 live births (https://data.worldbank.org/indicator/SH.DYN.MORT)
+- HIV prevalence (adults_with_hiv_percent_age_15_49.csv): The estimated number of people living with HIV per 100 population of age group 15-49.
+
+```{r, get_data, cache=TRUE}
+# load gapminder HIV data
+hiv <- read_csv(here::here("content/blogs/adults_with_hiv_percent_age_15_49.csv"))
+life_expectancy <- read_csv(here::here("content/blogs/life_expectancy_years.csv"))
+
+# get World bank data using wbstats
+indicators <- c("SP.DYN.TFRT.IN","SE.PRM.NENR", "SH.DYN.MORT", "NY.GDP.PCAP.KD")
+
+
+library(wbstats)
+
+worldbank_data <- wb_data(country="countries_only", #countries only- no aggregates like Latin America, Europe, etc.
+                          indicator = indicators, 
+                          start_date = 1960, 
+                          end_date = 2016)
+
+# get a dataframe of information regarding countries, indicators, sources, regions, indicator topics, lending types, income levels,  from the World Bank API 
+countries <-  wbstats::wb_cachelist$countries
+
+```
+
+
+## Join the 3 dataframes (life_expectancy, worldbank_data, and HIV) into one
+
+```{r}
+hiv_tidy <- hiv %>% 
+  pivot_longer(cols=c('1979':'2011'),names_to = "date",values_to = "hiv_percentage")
+hiv_tidy$date <- as.numeric(hiv_tidy$date)
+
+life_expectancy_tidy <- life_expectancy %>% 
+  pivot_longer(cols=c('1800':'2100'),names_to = "date",values_to = "life_exp")
+life_expectancy_tidy$date <- as.numeric(life_expectancy_tidy$date)  
+
+  
+region_worldbank_data <- left_join(countries, worldbank_data, by = "country") %>%
+  filter(region != "Aggregates")
+
+countries_data <- full_join(region_worldbank_data, life_expectancy_tidy, by = c("country", "date"))
+
+countries_data <- full_join(countries_data, hiv_tidy, by = c("country", "date")) %>%
+  filter(!is.na(region))
+
+```
+
+
+## Relationship between HIV prevalence and life expectancy
+
+```{r,warning=FALSE,message=FALSE}
+countries_hiv_lifeexp <- countries_data %>%
+  filter(date >= 1960, #very few datapoint before 1990
+         date <= 2011) %>% #No datapoint for hiv prevalence after 2011
+  group_by(country, region) %>%
+  summarise(mean_hiv = mean(hiv_percentage, na.rm = TRUE),
+            mean_life_exp = mean(life_exp, na.rm = TRUE)) %>%
+  na.omit()
+
+  ggplot(countries_hiv_lifeexp, aes(x = mean_hiv, y = mean_life_exp))+
+  geom_point()+
+  geom_smooth()+
+  facet_wrap(~region,scales="free")+ #faceting by countries will make too many plots and it can't show the whole trend
+  theme_bw()+
+  labs(x = "HIV Prevalence", 
+       y = "Life Expectancy", 
+       title = "Relationship between HIV Prevalence and Life Expectancy",
+       subtitle = "Between 1960 and 2011")
+```
+
+We noticed that the influence of HIV Prevalence on Life Expectancy varies between regions. In some regions, such as Europe & Central Asia and Latin America & Caribbean, the lower the HIV Prevalence, the higher the Life Expectancy, indicating that HIV Prevalence is a key factor of Life Expectancy. While in some other regions, such as South Asia and East Asia & Pacific, we can't see a clear trend. The reason might be that those regions don't have enough data to show the trend.
+
+
+## Relationship between fertility rate and GDP per capita
+
+```{r,warning=FALSE,message=FALSE}
+ggplot(countries_data, aes(x = NY.GDP.PCAP.KD, y = SP.DYN.TFRT.IN))+
+  geom_point()+
+  geom_smooth()+
+  facet_wrap(~region,scale="free")+
+  theme_bw()+
+  labs(x = "GDP per Capita", 
+       y = "Fertility Rate", 
+       title = "Relationship between Fertility Rate and GDP per Capita")
+
+```
+
+In most regions excluding Middle East & North Africa and Sub-Saharan, we can see a clear negative relationship between GDP per capita and Fertility Rate.When GDP per capita goes higher, the fertility rate goes down. In the those regions being excluded, there is a u-shape trend. When GDP per capita grows, the fertility rate first goes down then goes up .There might be specific tradition which supports them to give birth to more children when they have ability to raise up them.
+
+
+## Mortality rate for under 5 in different regions and improvement
+
+```{r,warning=FALSE,message=FALSE}
+countries_region_mortality <- countries_data %>%
+  group_by(region,date) %>% 
+  summarise(mean_mortality = mean(SH.DYN.MORT, na.rm = TRUE)) #drop NA to find mean, otherwise returns NA
+
+ggplot(countries_region_mortality, aes(x=date,y = mean_mortality ))+
+  geom_line()+
+  facet_wrap(~region)+ 
+  theme_bw()+
+  labs(x="Date",y = " Mortality Per 1000 for Under 5",
+       title = " Mortality Rate for Under 5 changed by region")
+
+
+countries_mortality_improvement <- select(countries_data, "country", "date", "region", "SH.DYN.MORT") %>%
+  na.omit()%>% 
+  group_by(country, region) %>%
+  mutate(first_rate = first(SH.DYN.MORT), 
+         last_rate = last(SH.DYN.MORT)) %>%
+  summarise(improvement_rate = mean((first_rate - last_rate)/first_rate))
+  
+
+south_asia <- countries_mortality_improvement %>%
+  filter(region == "South Asia") %>%
+  arrange(desc(improvement_rate))
+south_asia_top5 <-  south_asia %>% 
+  head(5)
+south_asia_tail5 <-  south_asia %>% 
+  tail(5)
+south_asia_top5
+south_asia_tail5
+
+
+east_asia_pacific <- countries_mortality_improvement %>%
+  filter(region == "East Asia & Pacific") %>%
+  arrange(desc(improvement_rate))
+east_asia_pacific_top5 <-  east_asia_pacific %>% 
+  head(5)
+east_asia_pacific_tail5 <-  east_asia_pacific %>% 
+  tail(5)
+east_asia_pacific_top5
+east_asia_pacific_tail5
+
+europe_central_asia <- countries_mortality_improvement %>%
+  filter(region == "Europe & Central Asia") %>%
+  arrange(desc(improvement_rate))
+europe_central_asia_top5 <-  europe_central_asia %>% 
+  head(5)
+europe_central_asia_tail5 <-  europe_central_asia %>% 
+  tail(5)
+europe_central_asia_top5
+europe_central_asia_tail5
+
+latin_america_caribbean <- countries_mortality_improvement %>%
+  filter(region == "Latin America & Caribbean") %>%
+  arrange(desc(improvement_rate))
+latin_america_caribbean_top5 <-  latin_america_caribbean %>% 
+  head(5)
+latin_america_caribbean_tail5 <-  latin_america_caribbean %>% 
+  tail(5)
+latin_america_caribbean_top5
+latin_america_caribbean_tail5
+
+middle_east_north_africa <- countries_mortality_improvement %>%
+  filter(region == "Middle East & North Africa") %>%
+  arrange(desc(improvement_rate))
+middle_east_north_africa_top5 <- middle_east_north_africa %>% 
+  head(5)
+middle_east_north_africa_tail5 <- middle_east_north_africa %>% 
+  tail(5)
+middle_east_north_africa_top5
+middle_east_north_africa_tail5 
+
+
+north_america <- countries_mortality_improvement %>%
+  filter(region == "North America") %>%
+  arrange(desc(improvement_rate))
+north_america_top5 <-  north_america %>% 
+  head(5)
+north_america_tail5 <-  north_america %>% 
+  tail(5)
+north_america_top5
+north_america_tail5 
+
+subsaharan_africa <- countries_mortality_improvement %>%
+  filter(region == "Sub-Saharan Africa") %>%
+  arrange(desc(improvement_rate))
+subsaharan_africa_top5 <-  subsaharan_africa %>% 
+  head(5)
+subsaharan_africa_tail5 <-  subsaharan_africa %>% 
+  tail(5)
+subsaharan_africa_top5
+subsaharan_africa_tail5
+
+
+```
+The mortality rate for under 5 drops between 1960 and 2016. Some regions witnessed larger decrease since they had a large mortality rate in 1960s. The trend of decrease may come from the development of technology and medical treatment.
+
+
+## Relationship between primary school enrollment and fertility rate
+
+```{r,warning=FALSE,message=FALSE}
+ggplot(countries_data, aes(x = SP.DYN.TFRT.IN, y = SE.PRM.NENR))+
+  geom_point()+
+  geom_smooth()+
+  facet_wrap(~region)+
+  theme_bw()+
+  labs(x = "Fertility Rate", 
+       y = "Primary School Enrollment", 
+       title = "Relationship between Fertility Rate and Primary School Enrollment")
+```
+
+We see a negative relationship between Fertility Rate and Primary School Enrollment. It might because that when people give birth to more babies, due to the limit of education resources, the enrollment to primary school decreases.
+
+

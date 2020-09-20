@@ -6,7 +6,46 @@
     <description>Recent content on Portfolio website for Ziyi Yang</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 31 Oct 2017 22:42:51 -0500</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 19 Sep 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Development gap - What shape it?</title>
+      <link>/blogs/blog8/</link>
+      <pubDate>Sat, 19 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blogs/blog8/</guid>
+      <description>Country development: Education, Fertility, HIV Prevalence, Life expectancy, Mortality and GDP Per Capita Variables we will explore are: - Life expectancy at birth (life_expectancy_years.csv) - GDP per capita in constant 2010 US$ (https://data.worldbank.org/indicator/NY.GDP.PCAP.KD) - Female fertility: The number of babies per woman (https://data.worldbank.org/indicator/SP.DYN.TFRT.IN) - Primary school enrollment as % of children attending primary school (https://data.worldbank.org/indicator/SE.PRM.NENR) - Mortality rate, for under 5, per 1000 live births (https://data.worldbank.org/indicator/SH.DYN.MORT) - HIV prevalence (adults_with_hiv_percent_age_15_49.</description>
+    </item>
+    
+    <item>
+      <title>Genre and Ratings - We are not object</title>
+      <link>/blogs/blog7/</link>
+      <pubDate>Sat, 19 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blogs/blog7/</guid>
+      <description>IMDB ratings: Differences between directors Let’s explore whether the mean IMDB rating for Steven Spielberg and Tim Burton are the same or not.
+Hypotheses a)Null Hypothesis: The means of the ratings of the two directors are the same. t stat&amp;lt;2, p-value&amp;gt;5% b)Alternative Hypothesis: The means of the ratings of the two directors are NOT the same.t stat&amp;gt;2 p-value&amp;lt;5%
+movies &amp;lt;- read_csv(here::here(&amp;quot;content/blogs/movies.csv&amp;quot;)) glimpse(movies) ## Rows: 2,961 ## Columns: 11 ## $ title &amp;lt;chr&amp;gt; &amp;quot;Avatar&amp;quot;, &amp;quot;Titanic&amp;quot;, &amp;quot;Jurassic World&amp;quot;, &amp;quot;The Aven… ## $ genre &amp;lt;chr&amp;gt; &amp;quot;Action&amp;quot;, &amp;quot;Drama&amp;quot;, &amp;quot;Action&amp;quot;, &amp;quot;Action&amp;quot;, &amp;quot;Action&amp;quot;,… ## $ director &amp;lt;chr&amp;gt; &amp;quot;James Cameron&amp;quot;, &amp;quot;James Cameron&amp;quot;, &amp;quot;Colin Trevorr… ## $ year &amp;lt;dbl&amp;gt; 2009, 1997, 2015, 2012, 2008, 1999, 1977, 2015, … ## $ duration &amp;lt;dbl&amp;gt; 178, 194, 124, 173, 152, 136, 125, 141, 164, 93,… ## $ gross &amp;lt;dbl&amp;gt; 760505847, 658672302, 652177271, 623279547, 5333… ## $ budget &amp;lt;dbl&amp;gt; 2.</description>
+    </item>
+    
+    <item>
+      <title>History Covid-19 cases across China</title>
+      <link>/blogs/blog5/</link>
+      <pubDate>Fri, 18 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blogs/blog5/</guid>
+      <description>Introduction Purpose of research We always wonder what is the best way for us to show the pandemic against geography information. Simple plots between the name of location and the number of cases is lack of visualisation. So we are now trying to see how to combine number of cases with a map.
+ Data Source It is amazing to see a package called “nCov2019” in Github which contains live data of confirmed cases in China.</description>
+    </item>
+    
+    <item>
+      <title>Oracle of Omaha&#39;s wise words</title>
+      <link>/blogs/blog6/</link>
+      <pubDate>Fri, 18 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blogs/blog6/</guid>
+      <description>Purpose of research There are always things for us to learn in investment. One of the best ways to grow your knowledge is to learn from those masters. No one would doubt the experience of Warren Buffett, the godfather of value investing. We are curious about investment under current Covid-19 pandemic. We use R to conclude those words that Warren mentioned over 15 times during the annual shareholder meeting and plot them on the wordcloud in which we can tell the frequency of words by their sizes.</description>
+    </item>
+    
     <item>
       <title>Aliquam</title>
       <link>/blogs/aliquam/</link>
