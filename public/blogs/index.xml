@@ -47,12 +47,12 @@ movies &amp;lt;- read_csv(here::here(&amp;quot;content/blogs/movies.csv&amp;quot
     </item>
     
     <item>
-      <title>Aliquam</title>
+      <title>My HOMETOWN - SHENZHEN</title>
       <link>/blogs/aliquam/</link>
       <pubDate>Tue, 31 Oct 2017 22:42:51 -0500</pubDate>
       
       <guid>/blogs/aliquam/</guid>
-      <description></description>
+      <description>I am from SHENZHEN, CHINA. It is in Southern China, adjacent to Hong Kong. It is a very young and energetic city, witnessing the rapid development of Chinese Economy under Reform and Open Policy since 1997.</description>
     </item>
     
     <item>

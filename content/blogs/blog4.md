@@ -3,10 +3,13 @@ categories:
 - ""
 - ""
 date: "2017-10-31T22:42:51-05:00"
-description: Nullam et orci eu lorem consequat tincidunt vivamus et sagittis magna sed nunc rhoncus condimentum sem. In efficitur ligula tate urna. Maecenas massa sed magna lacinia magna pellentesque lorem ipsum dolor. Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis tempus.
+description: 
 draft: false
-image: pic07.jpg
+image: pic15.jpg
 keywords: ""
 slug: aliquam
-title: Aliquam
+title:  My HOMETOWN - SHENZHEN 
 ---
+
+I am from SHENZHEN, CHINA. It is in Southern China, adjacent to Hong Kong. 
+It is a very young and energetic city, witnessing the rapid development of Chinese Economy under Reform and Open Policy since 1997.
