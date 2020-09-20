@@ -65,7 +65,7 @@ movies &amp;lt;- read_csv(here::here(&amp;quot;content/blogs/movies.csv&amp;quot
     </item>
     
     <item>
-      <title>Magna</title>
+      <title>Christmas 2019 in London</title>
       <link>/blogs/magna/</link>
       <pubDate>Tue, 31 Oct 2017 22:26:09 -0500</pubDate>
       
